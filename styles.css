@@ -711,14 +711,24 @@ h2 {
 
 .vehicle-card {
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 10px;
+  grid-template-columns: 140px 1fr auto;
+  gap: 12px;
   padding: 12px 14px;
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow);
   align-items: center;
+}
+
+.vehicle-thumb {
+  width: 140px;
+  height: 90px;
+  border-radius: 10px;
+  background: var(--panel-strong);
+  border: 1px solid var(--border);
+  object-fit: contain;
+  padding: 6px;
 }
 
 .vehicle-main {
@@ -798,6 +808,9 @@ h2 {
   .vehicle-card {
     grid-template-columns: 1fr;
     text-align: left;
+  }
+  .vehicle-thumb {
+    width: 100%;
   }
   .price-box {
     text-align: left;

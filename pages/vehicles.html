@@ -177,8 +177,12 @@
         const game = item['Игровое название'] || '';
         const shopM = item['Магазин по маджестику'] || '';
         const shopS = item['Магазин по серверу'] || '';
+        const img = item['Ссылка на фото'] || '';
         return `
           <div class="vehicle-card">
+            <div>
+              ${img ? `<img class="vehicle-thumb" src="${img}" alt="${game || title || ''}" loading="lazy" />` : `<div class="vehicle-thumb"></div>`}
+            </div>
             <div class="vehicle-main">
               <div class="vehicle-title">${game || title || 'Без названия'}</div>
               <div class="vehicle-id">${id ? `ID: ${id}` : ''}</div>
