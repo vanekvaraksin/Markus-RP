@@ -676,6 +676,66 @@ h2 {
   border: none;
 }
 
+.table-wrap {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  box-shadow: var(--shadow);
+  overflow: auto;
+}
+
+.table-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.table-controls input,
+.table-controls select {
+  background: var(--panel-strong);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  padding: 8px 10px;
+  min-width: 200px;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.data-table th,
+.data-table td {
+  border-bottom: 1px solid var(--border);
+  padding: 8px;
+  text-align: left;
+}
+
+.data-table th {
+  color: var(--pink);
+  font-weight: 600;
+}
+
+.data-table tr:hover td {
+  background: rgba(255, 79, 161, 0.06);
+}
+
+.pill-soft {
+  display: inline-flex;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: rgba(255, 79, 161, 0.12);
+  color: var(--pink);
+  border: 1px solid rgba(255, 79, 161, 0.3);
+  font-weight: 600;
+  font-size: 12px;
+}
+
 @media (max-width: 960px) {
   .navbar {
     grid-template-columns: 1fr;

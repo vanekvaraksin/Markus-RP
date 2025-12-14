@@ -74,22 +74,44 @@
             </div>
           </section>
 
-          <section class="embed-panel">
-            <iframe class="embed-frame"
-              src="https://docs.google.com/spreadsheets/d/1juQukjo1yW0SXTxEKHDuCREAHrq0522U3oXXj8Hudj8/htmlview?gid=0"
-              loading="lazy"></iframe>
+          <section class="table-wrap" id="vehiclesTableSection">
+            <div class="table-controls">
+              <input type="search" id="vehicleSearch" placeholder="Поиск по марке, игре или ID..." />
+              <select id="shopMajestic">
+                <option value="">Магазин по маджестику: Все</option>
+              </select>
+              <select id="shopServer">
+                <option value="">Магазин по серверу: Все</option>
+              </select>
+            </div>
+            <div class="muted small" id="vehiclesCount">Загрузка...</div>
+            <div class="table-scroll">
+              <table class="data-table" id="vehiclesTable">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>ID</th>
+                    <th>Марка</th>
+                    <th>Игровое название</th>
+                    <th>Магазин (Majestic)</th>
+                    <th>Магазин (сервер)</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
           </section>
 
           <section class="detail-section detail-highlight">
             <h2>Как читать таблицу</h2>
             <ul class="detail-list">
               <li>Столбцы: ID, марка/модель, игровое название, магазин/тип продажи.</li>
-              <li>Используйте поиск (Ctrl+F) или встроенный фильтр Google Sheets для нужного авто.</li>
-              <li>Цены и наличие зависят от обновлений — сверяйтесь с актуальной версией.</li>
+              <li>Используйте поиск и фильтры выше таблицы для нужного авто.</li>
+              <li>Цены и наличие зависят от обновлений — таблица обновляется из CSV.</li>
             </ul>
             <div class="meta-row">
-              <span class="meta-pill">Обновляется через Google Sheets</span>
-              <span class="meta-pill">Лучше открывать на широком экране</span>
+              <span class="meta-pill">Данные из локального CSV</span>
+              <span class="meta-pill">Лучше на широком экране</span>
             </div>
           </section>
         </article>
@@ -113,6 +135,123 @@
       <p class="muted small">Вся информация носит ознакомительный характер и не является офертой.</p>
     </footer>
   </div>
+
+  <script>
+    const csvUrl = '../data/vehicles.csv';
+    const searchInput = document.getElementById('vehicleSearch');
+    const shopMajesticSelect = document.getElementById('shopMajestic');
+    const shopServerSelect = document.getElementById('shopServer');
+    const tableBody = document.querySelector('#vehiclesTable tbody');
+    const countEl = document.getElementById('vehiclesCount');
+
+    function parseCSV(text) {
+      const rows = [];
+      let row = [];
+      let cell = '';
+      let inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        const next = text[i + 1];
+        if (c === '"' && inQuotes && next === '"') {
+          cell += '"';
+          i++;
+          continue;
+        }
+        if (c === '"') {
+          inQuotes = !inQuotes;
+          continue;
+        }
+        if (c === ',' && !inQuotes) {
+          row.push(cell.trim());
+          cell = '';
+          continue;
+        }
+        if ((c === '\n' || c === '\r') && !inQuotes) {
+          if (cell.length || row.length) {
+            row.push(cell.trim());
+            rows.push(row);
+            row = [];
+            cell = '';
+          }
+          continue;
+        }
+        cell += c;
+      }
+      if (cell.length || row.length) {
+        row.push(cell.trim());
+        rows.push(row);
+      }
+      return rows.filter(r => r.length > 1);
+    }
+
+    function renderTable(data) {
+      tableBody.innerHTML = data.map(item => `
+        <tr>
+          <td>${item['№'] || ''}</td>
+          <td>${item['ID авто'] || ''}</td>
+          <td>${item['Марка авто'] || ''}</td>
+          <td>${item['Игровое название'] || ''}</td>
+          <td>${item['Магазин по маджестику'] || ''}</td>
+          <td>${item['Магазин по серверу'] || ''}</td>
+        </tr>
+      `).join('');
+      countEl.textContent = \`Показано: ${data.length}\`;
+    }
+
+    function populateFilters(data) {
+      const unique = (arr, key) => [...new Set(arr.map(i => i[key]).filter(Boolean))].sort();
+      unique(data, 'Магазин по маджестику').forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v;
+        opt.textContent = v;
+        shopMajesticSelect.appendChild(opt);
+      });
+      unique(data, 'Магазин по серверу').forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v;
+        opt.textContent = v;
+        shopServerSelect.appendChild(opt);
+      });
+    }
+
+    function applyFilters(allRows) {
+      const query = (searchInput.value || '').toLowerCase();
+      const shopM = shopMajesticSelect.value;
+      const shopS = shopServerSelect.value;
+      return allRows.filter(item => {
+        const text = \`\${item['ID авто']} \${item['Марка авто']} \${item['Игровое название']}\`.toLowerCase();
+        if (query && !text.includes(query)) return false;
+        if (shopM && item['Магазин по маджестику'] !== shopM) return false;
+        if (shopS && item['Магазин по серверу'] !== shopS) return false;
+        return true;
+      });
+    }
+
+    async function initTable() {
+      try {
+        const res = await fetch(csvUrl);
+        const txt = await res.text();
+        const rows = parseCSV(txt);
+        const headers = rows[0];
+        const data = rows.slice(1).map(r => {
+          const obj = {};
+          headers.forEach((h, idx) => obj[h] = r[idx] || '');
+          return obj;
+        });
+        populateFilters(data);
+        const update = () => renderTable(applyFilters(data));
+        searchInput.addEventListener('input', update);
+        shopMajesticSelect.addEventListener('change', update);
+        shopServerSelect.addEventListener('change', update);
+        update();
+      } catch (e) {
+        countEl.textContent = 'Ошибка загрузки таблицы';
+        console.error(e);
+      }
+    }
+
+    initTable();
+  </script>
 </body>
 </html>
 
