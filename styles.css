@@ -147,6 +147,11 @@ a {
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
 }
 
+.btn.small {
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
 .hero {
   position: relative;
   overflow: hidden;
@@ -534,6 +539,15 @@ h2 {
 .detail-hero h1 {
   margin: 4px 0 8px;
   font-size: 32px;
+}
+
+.hero-top-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.hero-top-actions .btn {
+  margin-bottom: 8px;
 }
 
 .detail-hero .chips {
