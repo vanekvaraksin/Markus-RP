@@ -66,15 +66,30 @@
 
         <article class="detail-content">
           <section class="detail-section">
-            <h2>Что будет здесь</h2>
-            <p class="muted">Список авто, мото, грузовиков: скорости, приводы, цены, требования к лицензиям.</p>
-          </section>
-          <section class="detail-section detail-highlight">
-            <h2>Статус</h2>
-            <p>Раздел в подготовке. Планируем фильтры и сравнение моделей.</p>
+            <h2>Таблица транспорта</h2>
+            <p class="muted">Список авто, мото и спецтехники с ценами, классами и характеристиками.</p>
             <div class="meta-row">
-              <span class="meta-pill">Фаза: контент</span>
-              <span class="meta-pill">Обновление: скоро</span>
+              <span class="meta-pill">Источник: Google Sheets</span>
+              <span class="meta-pill">Фильтры и поиск внутри таблицы</span>
+            </div>
+          </section>
+
+          <section class="embed-panel">
+            <iframe class="embed-frame"
+              src="https://docs.google.com/spreadsheets/d/1juQukjo1yW0SXTxEKHDuCREAHrq0522U3oXXj8Hudj8/htmlview?gid=0"
+              loading="lazy"></iframe>
+          </section>
+
+          <section class="detail-section detail-highlight">
+            <h2>Как читать таблицу</h2>
+            <ul class="detail-list">
+              <li>Столбцы: ID, марка/модель, игровое название, магазин/тип продажи.</li>
+              <li>Используйте поиск (Ctrl+F) или встроенный фильтр Google Sheets для нужного авто.</li>
+              <li>Цены и наличие зависят от обновлений — сверяйтесь с актуальной версией.</li>
+            </ul>
+            <div class="meta-row">
+              <span class="meta-pill">Обновляется через Google Sheets</span>
+              <span class="meta-pill">Лучше открывать на широком экране</span>
             </div>
           </section>
         </article>
