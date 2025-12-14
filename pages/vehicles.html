@@ -85,29 +85,15 @@
               </select>
             </div>
             <div class="muted small" id="vehiclesCount">Загрузка...</div>
-            <div class="table-scroll">
-              <table class="data-table" id="vehiclesTable">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>ID</th>
-                    <th>Марка</th>
-                    <th>Игровое название</th>
-                    <th>Магазин (Majestic)</th>
-                    <th>Магазин (сервер)</th>
-                  </tr>
-                </thead>
-                <tbody></tbody>
-              </table>
-            </div>
+            <div class="cards-list" id="vehiclesCards"></div>
           </section>
 
           <section class="detail-section detail-highlight">
             <h2>Как читать таблицу</h2>
             <ul class="detail-list">
               <li>Столбцы: ID, марка/модель, игровое название, магазин/тип продажи.</li>
-              <li>Используйте поиск и фильтры выше таблицы для нужного авто.</li>
-              <li>Цены и наличие зависят от обновлений — таблица обновляется из CSV.</li>
+              <li>Используйте поиск и фильтры выше списка для нужного авто.</li>
+              <li>Цены и наличие зависят от обновлений — список обновляется из CSV.</li>
             </ul>
             <div class="meta-row">
               <span class="meta-pill">Данные из локального CSV</span>
@@ -141,7 +127,7 @@
     const searchInput = document.getElementById('vehicleSearch');
     const shopMajesticSelect = document.getElementById('shopMajestic');
     const shopServerSelect = document.getElementById('shopServer');
-    const tableBody = document.querySelector('#vehiclesTable tbody');
+    const cardsWrap = document.getElementById('vehiclesCards');
     const countEl = document.getElementById('vehiclesCount');
 
     function parseCSV(text) {
@@ -184,18 +170,32 @@
       return rows.filter(r => r.length > 1);
     }
 
-    function renderTable(data) {
-      tableBody.innerHTML = data.map(item => `
-        <tr>
-          <td>${item['№'] || ''}</td>
-          <td>${item['ID авто'] || ''}</td>
-          <td>${item['Марка авто'] || ''}</td>
-          <td>${item['Игровое название'] || ''}</td>
-          <td>${item['Магазин по маджестику'] || ''}</td>
-          <td>${item['Магазин по серверу'] || ''}</td>
-        </tr>
-      `).join('');
-      countEl.textContent = \`Показано: ${data.length}\`;
+    function renderCards(data) {
+      cardsWrap.innerHTML = data.map(item => {
+        const id = item['ID авто'] || '';
+        const title = item['Марка авто'] || '';
+        const game = item['Игровое название'] || '';
+        const shopM = item['Магазин по маджестику'] || '';
+        const shopS = item['Магазин по серверу'] || '';
+        return `
+          <div class="vehicle-card">
+            <div class="vehicle-main">
+              <div class="vehicle-title">${game || title || 'Без названия'}</div>
+              <div class="vehicle-id">${id ? `ID: ${id}` : ''}</div>
+              <div class="vehicle-tags">
+                ${title ? `<span class="pill-soft">${title}</span>` : ''}
+                ${shopM ? `<span class="pill-soft">${shopM}</span>` : ''}
+                ${shopS ? `<span class="pill-soft">${shopS}</span>` : ''}
+              </div>
+            </div>
+            <div class="price-box">
+              <div class="price-value">—</div>
+              <div class="muted small">Цена не указана в CSV</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      countEl.textContent = `Показано: ${data.length}`;
     }
 
     function populateFilters(data) {
@@ -219,7 +219,7 @@
       const shopM = shopMajesticSelect.value;
       const shopS = shopServerSelect.value;
       return allRows.filter(item => {
-        const text = \`\${item['ID авто']} \${item['Марка авто']} \${item['Игровое название']}\`.toLowerCase();
+        const text = `${item['ID авто']} ${item['Марка авто']} ${item['Игровое название']}`.toLowerCase();
         if (query && !text.includes(query)) return false;
         if (shopM && item['Магазин по маджестику'] !== shopM) return false;
         if (shopS && item['Магазин по серверу'] !== shopS) return false;
@@ -239,19 +239,21 @@
           return obj;
         });
         populateFilters(data);
-        const update = () => renderTable(applyFilters(data));
+        const update = () => renderCards(applyFilters(data));
         searchInput.addEventListener('input', update);
         shopMajesticSelect.addEventListener('change', update);
         shopServerSelect.addEventListener('change', update);
         update();
       } catch (e) {
-        countEl.textContent = 'Ошибка загрузки таблицы';
+        countEl.textContent = 'Ошибка загрузки списка';
         console.error(e);
       }
     }
 
     initTable();
   </script>
+</body>
+</html>
 </body>
 </html>
 
