@@ -68,16 +68,19 @@
           <section class="table-wrap" id="businessSection">
             <div class="table-controls">
               <input type="search" id="bizSearch" placeholder="Поиск по названию..." />
+              <button class="sort-btn" id="bizSort">Сначала новые</button>
             </div>
+            <div class="biz-filters" id="bizFilters"></div>
             <div class="muted small" id="bizCount">Загрузка...</div>
-            <div class="cards-list" id="bizCards"></div>
+            <div class="cards-grid" id="bizCards"></div>
           </section>
 
           <section class="detail-section detail-highlight">
             <h2>Как читать список</h2>
             <ul class="detail-list">
               <li>Данные берутся из CSV: название, стоимость, фото.</li>
-              <li>Используйте поиск выше для фильтрации по названию.</li>
+              <li>Используйте поиск и фильтр по типу.</li>
+              <li>Сортировка кнопкой: прямой/обратный порядок списка.</li>
             </ul>
             <div class="meta-row">
               <span class="meta-pill">Источник: локальный CSV</span>
@@ -111,6 +114,12 @@
     const bizSearch = document.getElementById('bizSearch');
     const bizCards = document.getElementById('bizCards');
     const bizCount = document.getElementById('bizCount');
+    const bizFilters = document.getElementById('bizFilters');
+    const bizSortBtn = document.getElementById('bizSort');
+
+    let sortDesc = false;
+    const filterOptions = ['Все', 'Заправка', 'Банкомат', 'Магазин 24/7', 'Магазин одежды', 'Другое'];
+    let activeFilter = 'Все';
 
     function parseCSV(text) {
       const rows = [];
@@ -152,6 +161,27 @@
       return rows.filter(r => r.length > 1);
     }
 
+    function detectType(name = '') {
+      const lower = name.toLowerCase();
+      if (lower.startsWith('заправка')) return 'Заправка';
+      if (lower.startsWith('банкомат')) return 'Банкомат';
+      if (lower.startsWith('магазин 24/7')) return 'Магазин 24/7';
+      if (lower.startsWith('магазин одежды')) return 'Магазин одежды';
+      return 'Другое';
+    }
+
+    function renderFilters() {
+      bizFilters.innerHTML = filterOptions.map(opt => `
+        <button class="chip-btn ${opt === activeFilter ? 'active' : ''}" data-filter="${opt}">${opt}</button>
+      `).join('');
+      [...bizFilters.querySelectorAll('.chip-btn')].forEach(btn => {
+        btn.addEventListener('click', () => {
+          activeFilter = btn.dataset.filter;
+          updateView();
+        });
+      });
+    }
+
     function renderBiz(data) {
       bizCards.innerHTML = data.map(item => {
         const name = item['Название'] || '';
@@ -182,20 +212,48 @@
       });
     }
 
+    function applyBizFilter(allRows) {
+      const query = (bizSearch.value || '').toLowerCase();
+      return allRows.filter(item => {
+        const text = `${item['Название']}`.toLowerCase();
+        const type = detectType(item['Название']);
+        if (query && !text.includes(query)) return false;
+        if (activeFilter !== 'Все' && type !== activeFilter) return false;
+        return true;
+      });
+    }
+
+    function sortData(data) {
+      const arr = [...data];
+      if (sortDesc) arr.reverse();
+      return arr;
+    }
+
+    let allData = [];
+
+    function updateView() {
+      renderBiz(sortData(applyBizFilter(allData)));
+    }
+
     async function initBiz() {
       try {
         const res = await fetch(bizCsvUrl);
         const txt = await res.text();
         const rows = parseCSV(txt);
         const headers = rows[0];
-        const data = rows.slice(1).map(r => {
+        allData = rows.slice(1).map(r => {
           const obj = {};
           headers.forEach((h, idx) => obj[h] = r[idx] || '');
           return obj;
         });
-        const update = () => renderBiz(applyBizFilter(data));
-        bizSearch.addEventListener('input', update);
-        update();
+        renderFilters();
+        bizSearch.addEventListener('input', updateView);
+        bizSortBtn.addEventListener('click', () => {
+          sortDesc = !sortDesc;
+          bizSortBtn.textContent = sortDesc ? 'Сначала старые' : 'Сначала новые';
+          updateView();
+        });
+        updateView();
       } catch (e) {
         bizCount.textContent = 'Ошибка загрузки списка';
         console.error(e);
