@@ -39,7 +39,7 @@
         </div>
         <p class="eyebrow">Навигация</p>
         <h1>Бизнесы</h1>
-        <p class="muted">Каталог бизнесов Markus RP: типы, требования, доходность, управление.</p>
+        <p class="muted">Каталог бизнесов Markus RP: карточки с ценой и фото.</p>
         <div class="chips">
           <span class="pill pill-pink">Бизнес</span>
           <span class="pill pill-dark">Каталог</span>
@@ -65,16 +65,23 @@
         </aside>
 
         <article class="detail-content">
-          <section class="detail-section">
-            <h2>Что будет здесь</h2>
-            <p class="muted">Список бизнесов, лицензии, налоги, слоты, ассортименты и управление персоналом.</p>
+          <section class="table-wrap" id="businessSection">
+            <div class="table-controls">
+              <input type="search" id="bizSearch" placeholder="Поиск по названию..." />
+            </div>
+            <div class="muted small" id="bizCount">Загрузка...</div>
+            <div class="cards-list" id="bizCards"></div>
           </section>
+
           <section class="detail-section detail-highlight">
-            <h2>Статус</h2>
-            <p>Раздел в подготовке. Планируем добавить калькулятор прибыли и фильтры.</p>
+            <h2>Как читать список</h2>
+            <ul class="detail-list">
+              <li>Данные берутся из CSV: название, стоимость, фото.</li>
+              <li>Используйте поиск выше для фильтрации по названию.</li>
+            </ul>
             <div class="meta-row">
-              <span class="meta-pill">Фаза: контент</span>
-              <span class="meta-pill">Обновление: скоро</span>
+              <span class="meta-pill">Источник: локальный CSV</span>
+              <span class="meta-pill">Обновляется при замене файла</span>
             </div>
           </section>
         </article>
@@ -98,6 +105,106 @@
       <p class="muted small">Вся информация носит ознакомительный характер и не является офертой.</p>
     </footer>
   </div>
+
+  <script>
+    const bizCsvUrl = '../data/businesses.csv';
+    const bizSearch = document.getElementById('bizSearch');
+    const bizCards = document.getElementById('bizCards');
+    const bizCount = document.getElementById('bizCount');
+
+    function parseCSV(text) {
+      const rows = [];
+      let row = [];
+      let cell = '';
+      let inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        const next = text[i + 1];
+        if (c === '"' && inQuotes && next === '"') {
+          cell += '"';
+          i++;
+          continue;
+        }
+        if (c === '"') {
+          inQuotes = !inQuotes;
+          continue;
+        }
+        if (c === ',' && !inQuotes) {
+          row.push(cell.trim());
+          cell = '';
+          continue;
+        }
+        if ((c === '\n' || c === '\r') && !inQuotes) {
+          if (cell.length || row.length) {
+            row.push(cell.trim());
+            rows.push(row);
+            row = [];
+            cell = '';
+          }
+          continue;
+        }
+        cell += c;
+      }
+      if (cell.length || row.length) {
+        row.push(cell.trim());
+        rows.push(row);
+      }
+      return rows.filter(r => r.length > 1);
+    }
+
+    function renderBiz(data) {
+      bizCards.innerHTML = data.map(item => {
+        const name = item['Название'] || '';
+        const price = item['Стоимость'] || '';
+        const img = item['URL фото'] || '';
+        return `
+          <div class="vehicle-card">
+            <div>
+              ${img ? `<img class="vehicle-thumb" src="${img}" alt="${name}" loading="lazy" />` : `<div class="vehicle-thumb"></div>`}
+            </div>
+            <div class="vehicle-main">
+              <div class="vehicle-title">${name}</div>
+              <div class="vehicle-tags">
+                ${price ? `<span class="pill-soft">${price}</span>` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      bizCount.textContent = `Показано: ${data.length}`;
+    }
+
+    function applyBizFilter(allRows) {
+      const query = (bizSearch.value || '').toLowerCase();
+      return allRows.filter(item => {
+        const text = `${item['Название']}`.toLowerCase();
+        return !query || text.includes(query);
+      });
+    }
+
+    async function initBiz() {
+      try {
+        const res = await fetch(bizCsvUrl);
+        const txt = await res.text();
+        const rows = parseCSV(txt);
+        const headers = rows[0];
+        const data = rows.slice(1).map(r => {
+          const obj = {};
+          headers.forEach((h, idx) => obj[h] = r[idx] || '');
+          return obj;
+        });
+        const update = () => renderBiz(applyBizFilter(data));
+        bizSearch.addEventListener('input', update);
+        update();
+      } catch (e) {
+        bizCount.textContent = 'Ошибка загрузки списка';
+        console.error(e);
+      }
+    }
+
+    initBiz();
+  </script>
 </body>
 </html>
+
 
