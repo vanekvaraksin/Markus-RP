@@ -122,7 +122,16 @@
       const bounds = [[0, 0], [imgHeight, imgWidth]];
       const imageLayer = L.imageOverlay(imgPath, bounds);
       imageLayer.addTo(map);
+
+      // Ограничиваем выход за пределы картинки и подгоняем стартовый зум
+      const fitZoom = map.getBoundsZoom(bounds, true);
+      map.setMaxBounds(bounds);
+      map.options.maxBoundsViscosity = 1.0;
+      map.setMinZoom(fitZoom);
+      map.setMaxZoom(2);
+      map.setZoom(fitZoom);
       map.fitBounds(bounds);
+
       setStatus('Карта загружена');
     }
 
@@ -131,8 +140,8 @@
         crs: L.CRS.Simple,
         zoomSnap: 0.25,
         zoomDelta: 0.5,
-        minZoom: -2,
-        maxZoom: 4,
+        minZoom: -2, // временно, потом выставим по картинке
+        maxZoom: 2,
       });
       initImageOverlay(map, imgWidth, imgHeight, imgPath);
     }
