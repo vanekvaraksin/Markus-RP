@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Markus RP — Бизнесы</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="navbar">
+      <div class="brand">
+        <div class="brand-mark">M</div>
+        <div class="brand-text">
+          <span class="brand-title">Markus RP</span>
+          <span class="brand-sub">Вики проекта</span>
+        </div>
+      </div>
+      <nav class="nav-links">
+        <a href="../index.html#top">Главная</a>
+        <a href="../index.html#guides">Категории</a>
+        <a href="../index.html#navigation">Навигация</a>
+        <a href="../index.html#events">События</a>
+        <a href="../index.html#cta">Играть</a>
+      </nav>
+      <div class="nav-actions">
+        <a class="btn ghost" href="../index.html">На главную</a>
+        <a class="btn primary" href="../categories/seasons.html">Боевой пропуск</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="detail-hero">
+        <div class="hero-top-actions">
+          <a class="btn ghost small" href="../index.html">← На главную</a>
+        </div>
+        <p class="eyebrow">Навигация</p>
+        <h1>Бизнесы</h1>
+        <p class="muted">Каталог бизнесов Markus RP: карточки с ценой и фото.</p>
+        <div class="chips">
+          <span class="pill pill-pink">Бизнес</span>
+          <span class="pill pill-dark">Каталог</span>
+        </div>
+      </section>
+
+      <div class="detail-layout">
+        <aside class="detail-side">
+          <div class="muted small">Разделы</div>
+          <nav class="side-nav">
+            <a href="map.html">Карта</a>
+            <a href="changelog.html">История изменений</a>
+            <a href="clothes-male.html">Мужская одежда</a>
+            <a href="clothes-female.html">Женская одежда</a>
+            <a href="realty.html">Недвижимость</a>
+            <a class="active" href="business.html">Бизнесы</a>
+            <a href="vehicles.html">Транспорт</a>
+            <a href="items.html">Предметы</a>
+            <a href="crafts.html">Крафты</a>
+            <a href="animations.html">Анимации</a>
+            <a href="skins.html">Скины</a>
+          </nav>
+        </aside>
+
+        <article class="detail-content">
+          <section class="table-wrap" id="businessSection">
+            <div class="table-controls">
+              <input type="search" id="bizSearch" placeholder="Поиск по названию..." />
+              <button class="sort-btn" id="bizSort">Сначала новые</button>
+            </div>
+            <div class="biz-filters" id="bizFilters"></div>
+            <div class="muted small" id="bizCount">Загрузка...</div>
+            <div class="cards-grid" id="bizCards"></div>
+          </section>
+
+          <section class="detail-section detail-highlight">
+            <h2>Как читать список</h2>
+            <ul class="detail-list">
+              <li>Данные берутся из CSV: название, стоимость, фото.</li>
+              <li>Используйте поиск и фильтр по типу.</li>
+              <li>Сортировка кнопкой: прямой/обратный порядок списка.</li>
+            </ul>
+            <div class="meta-row">
+              <span class="meta-pill">Источник: локальный CSV</span>
+              <span class="meta-pill">Обновляется при замене файла</span>
+            </div>
+          </section>
+        </article>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="brand">
+        <div class="brand-mark">M</div>
+        <div class="brand-text">
+          <span class="brand-title">Markus RP</span>
+          <span class="brand-sub">Розово-чёрная вселенная</span>
+        </div>
+      </div>
+      <div class="footer-links">
+        <a href="../index.html#guides">Гайды</a>
+        <a href="../index.html#navigation">Навигация</a>
+        <a href="../index.html#events">События</a>
+        <a href="../index.html#cta">Играть</a>
+      </div>
+      <p class="muted small">Вся информация носит ознакомительный характер и не является офертой.</p>
+    </footer>
+  </div>
+
+  <script>
+    const bizCsvUrl = '../data/businesses.csv';
+    const bizSearch = document.getElementById('bizSearch');
+    const bizCards = document.getElementById('bizCards');
+    const bizCount = document.getElementById('bizCount');
+    const bizFilters = document.getElementById('bizFilters');
+    const bizSortBtn = document.getElementById('bizSort');
+
+    let sortDesc = false;
+    const filterOptions = ['Все', 'Заправка', 'Банкомат', 'Магазин 24/7', 'Магазин одежды', 'Другое'];
+    let activeFilter = 'Все';
+
+    function parseCSV(text) {
+      const rows = [];
+      let row = [];
+      let cell = '';
+      let inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        const next = text[i + 1];
+        if (c === '"' && inQuotes && next === '"') {
+          cell += '"';
+          i++;
+          continue;
+        }
+        if (c === '"') {
+          inQuotes = !inQuotes;
+          continue;
+        }
+        if (c === ',' && !inQuotes) {
+          row.push(cell.trim());
+          cell = '';
+          continue;
+        }
+        if ((c === '\n' || c === '\r') && !inQuotes) {
+          if (cell.length || row.length) {
+            row.push(cell.trim());
+            rows.push(row);
+            row = [];
+            cell = '';
+          }
+          continue;
+        }
+        cell += c;
+      }
+      if (cell.length || row.length) {
+        row.push(cell.trim());
+        rows.push(row);
+      }
+      return rows.filter(r => r.length > 1);
+    }
+
+    function detectType(name = '') {
+      const lower = name.toLowerCase();
+      if (lower.startsWith('заправка')) return 'Заправка';
+      if (lower.startsWith('банкомат')) return 'Банкомат';
+      if (lower.startsWith('магазин 24/7')) return 'Магазин 24/7';
+      if (lower.startsWith('магазин одежды')) return 'Магазин одежды';
+      return 'Другое';
+    }
+
+    function renderFilters() {
+      bizFilters.innerHTML = filterOptions.map(opt => `
+        <button class="chip-btn ${opt === activeFilter ? 'active' : ''}" data-filter="${opt}">${opt}</button>
+      `).join('');
+      [...bizFilters.querySelectorAll('.chip-btn')].forEach(btn => {
+        btn.addEventListener('click', () => {
+          activeFilter = btn.dataset.filter;
+          updateView();
+        });
+      });
+    }
+
+    function renderBiz(data) {
+      bizCards.innerHTML = data.map(item => {
+        const name = item['Название'] || '';
+        const price = item['Стоимость'] || '';
+        const img = item['URL фото'] || '';
+        return `
+          <div class="vehicle-card">
+            <div>
+              ${img ? `<img class="vehicle-thumb" src="${img}" alt="${name}" loading="lazy" />` : `<div class="vehicle-thumb"></div>`}
+            </div>
+            <div class="vehicle-main">
+              <div class="vehicle-title">${name}</div>
+              <div class="vehicle-tags">
+                ${price ? `<span class="pill-soft">${price}</span>` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      bizCount.textContent = `Показано: ${data.length}`;
+    }
+
+    function applyBizFilter(allRows) {
+      const query = (bizSearch.value || '').toLowerCase();
+      return allRows.filter(item => {
+        const text = `${item['Название']}`.toLowerCase();
+        return !query || text.includes(query);
+      });
+    }
+
+    function applyBizFilter(allRows) {
+      const query = (bizSearch.value || '').toLowerCase();
+      return allRows.filter(item => {
+        const text = `${item['Название']}`.toLowerCase();
+        const type = detectType(item['Название']);
+        if (query && !text.includes(query)) return false;
+        if (activeFilter !== 'Все' && type !== activeFilter) return false;
+        return true;
+      });
+    }
+
+    function sortData(data) {
+      const arr = [...data];
+      if (sortDesc) arr.reverse();
+      return arr;
+    }
+
+    let allData = [];
+
+    function updateView() {
+      renderBiz(sortData(applyBizFilter(allData)));
+    }
+
+    async function initBiz() {
+      try {
+        const res = await fetch(bizCsvUrl);
+        const txt = await res.text();
+        const rows = parseCSV(txt);
+        const headers = rows[0];
+        allData = rows.slice(1).map(r => {
+          const obj = {};
+          headers.forEach((h, idx) => obj[h] = r[idx] || '');
+          return obj;
+        });
+        renderFilters();
+        bizSearch.addEventListener('input', updateView);
+        bizSortBtn.addEventListener('click', () => {
+          sortDesc = !sortDesc;
+          bizSortBtn.textContent = sortDesc ? 'Сначала старые' : 'Сначала новые';
+          updateView();
+        });
+        updateView();
+      } catch (e) {
+        bizCount.textContent = 'Ошибка загрузки списка';
+        console.error(e);
+      }
+    }
+
+    initBiz();
+  </script>
+</body>
+</html>
+
+

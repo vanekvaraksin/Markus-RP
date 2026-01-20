@@ -835,47 +835,6 @@ h2 {
   text-align: left;
 }
 
-/* Skins gallery */
-.skin-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 12px;
-}
-
-.skin-card {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.skin-thumb {
-  width: 100%;
-  height: 220px;
-  object-fit: cover;
-  background: var(--panel-strong);
-}
-
-.skin-body {
-  padding: 10px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.skin-title {
-  font-weight: 700;
-  font-size: 16px;
-}
-
-.skin-meta {
-  color: var(--muted);
-  font-size: 13px;
-}
-
 .data-table th {
   color: var(--pink);
   font-weight: 600;

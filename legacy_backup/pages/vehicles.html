@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Markus RP — Транспорт</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="navbar">
+      <div class="brand">
+        <div class="brand-mark">M</div>
+        <div class="brand-text">
+          <span class="brand-title">Markus RP</span>
+          <span class="brand-sub">Вики проекта</span>
+        </div>
+      </div>
+      <nav class="nav-links">
+        <a href="../index.html#top">Главная</a>
+        <a href="../index.html#guides">Категории</a>
+        <a href="../index.html#navigation">Навигация</a>
+        <a href="../index.html#events">События</a>
+        <a href="../index.html#cta">Играть</a>
+      </nav>
+      <div class="nav-actions">
+        <a class="btn ghost" href="../index.html">На главную</a>
+        <a class="btn primary" href="../categories/seasons.html">Боевой пропуск</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="detail-hero">
+        <div class="hero-top-actions">
+          <a class="btn ghost small" href="../index.html">← На главную</a>
+        </div>
+        <p class="eyebrow">Навигация</p>
+        <h1>Транспорт</h1>
+        <p class="muted">Каталог транспорта Markus RP: классы, характеристики, тюнинг и стоимость.</p>
+        <div class="chips">
+          <span class="pill pill-pink">Транспорт</span>
+          <span class="pill pill-dark">Каталог</span>
+        </div>
+      </section>
+
+      <div class="detail-layout">
+        <aside class="detail-side">
+          <div class="muted small">Разделы</div>
+          <nav class="side-nav">
+            <a href="map.html">Карта</a>
+            <a href="changelog.html">История изменений</a>
+            <a href="clothes-male.html">Мужская одежда</a>
+            <a href="clothes-female.html">Женская одежда</a>
+            <a href="realty.html">Недвижимость</a>
+            <a href="business.html">Бизнесы</a>
+            <a class="active" href="vehicles.html">Транспорт</a>
+            <a href="items.html">Предметы</a>
+            <a href="crafts.html">Крафты</a>
+            <a href="animations.html">Анимации</a>
+            <a href="skins.html">Скины</a>
+          </nav>
+        </aside>
+
+        <article class="detail-content">
+          <section class="detail-section">
+            <h2>Таблица транспорта</h2>
+            <p class="muted">Список авто, мото и спецтехники с ценами, классами и характеристиками.</p>
+            <div class="meta-row">
+              <span class="meta-pill">Источник: Google Sheets</span>
+              <span class="meta-pill">Фильтры и поиск внутри таблицы</span>
+            </div>
+          </section>
+
+          <section class="table-wrap" id="vehiclesTableSection">
+            <div class="table-controls">
+              <input type="search" id="vehicleSearch" placeholder="Поиск по марке, игре или ID..." />
+              <select id="shopMajestic">
+                <option value="">Магазин по маджестику: Все</option>
+              </select>
+              <select id="shopServer">
+                <option value="">Магазин по серверу: Все</option>
+              </select>
+            </div>
+            <div class="muted small" id="vehiclesCount">Загрузка...</div>
+            <div class="cards-list" id="vehiclesCards"></div>
+          </section>
+
+          <section class="detail-section detail-highlight">
+            <h2>Как читать таблицу</h2>
+            <ul class="detail-list">
+              <li>Столбцы: ID, марка/модель, игровое название, магазин/тип продажи.</li>
+              <li>Используйте поиск и фильтры выше списка для нужного авто.</li>
+              <li>Цены и наличие зависят от обновлений — список обновляется из CSV.</li>
+            </ul>
+            <div class="meta-row">
+              <span class="meta-pill">Данные из локального CSV</span>
+              <span class="meta-pill">Лучше на широком экране</span>
+            </div>
+          </section>
+        </article>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="brand">
+        <div class="brand-mark">M</div>
+        <div class="brand-text">
+          <span class="brand-title">Markus RP</span>
+          <span class="brand-sub">Розово-чёрная вселенная</span>
+        </div>
+      </div>
+      <div class="footer-links">
+        <a href="../index.html#guides">Гайды</a>
+        <a href="../index.html#navigation">Навигация</a>
+        <a href="../index.html#events">События</a>
+        <a href="../index.html#cta">Играть</a>
+      </div>
+      <p class="muted small">Вся информация носит ознакомительный характер и не является офертой.</p>
+    </footer>
+  </div>
+
+  <script>
+    const csvUrl = '../data/vehicles.csv';
+    const searchInput = document.getElementById('vehicleSearch');
+    const shopMajesticSelect = document.getElementById('shopMajestic');
+    const shopServerSelect = document.getElementById('shopServer');
+    const cardsWrap = document.getElementById('vehiclesCards');
+    const countEl = document.getElementById('vehiclesCount');
+
+    function parseCSV(text) {
+      const rows = [];
+      let row = [];
+      let cell = '';
+      let inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        const next = text[i + 1];
+        if (c === '"' && inQuotes && next === '"') {
+          cell += '"';
+          i++;
+          continue;
+        }
+        if (c === '"') {
+          inQuotes = !inQuotes;
+          continue;
+        }
+        if (c === ',' && !inQuotes) {
+          row.push(cell.trim());
+          cell = '';
+          continue;
+        }
+        if ((c === '\n' || c === '\r') && !inQuotes) {
+          if (cell.length || row.length) {
+            row.push(cell.trim());
+            rows.push(row);
+            row = [];
+            cell = '';
+          }
+          continue;
+        }
+        cell += c;
+      }
+      if (cell.length || row.length) {
+        row.push(cell.trim());
+        rows.push(row);
+      }
+      return rows.filter(r => r.length > 1);
+    }
+
+    function renderCards(data) {
+      cardsWrap.innerHTML = data.map(item => {
+        const id = item['ID авто'] || '';
+        const title = item['Марка авто'] || '';
+        const game = item['Игровое название'] || '';
+        const shopM = item['Магазин по маджестику'] || '';
+        const shopS = item['Магазин по серверу'] || '';
+        const img = item['Ссылка на фото'] || '';
+        return `
+          <div class="vehicle-card">
+            <div>
+              ${img ? `<img class="vehicle-thumb" src="${img}" alt="${game || title || ''}" loading="lazy" />` : `<div class="vehicle-thumb"></div>`}
+            </div>
+            <div class="vehicle-main">
+              <div class="vehicle-title">${game || title || 'Без названия'}</div>
+              <div class="vehicle-id">${id ? `ID: ${id}` : ''}</div>
+              <div class="vehicle-tags">
+                ${title ? `<span class="pill-soft">${title}</span>` : ''}
+                ${shopM ? `<span class="pill-soft">${shopM}</span>` : ''}
+                ${shopS ? `<span class="pill-soft">${shopS}</span>` : ''}
+              </div>
+            </div>
+            <div class="price-box">
+              <div class="price-value">—</div>
+              <div class="muted small">Цена не указана в CSV</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      countEl.textContent = `Показано: ${data.length}`;
+    }
+
+    function populateFilters(data) {
+      const unique = (arr, key) => [...new Set(arr.map(i => i[key]).filter(Boolean))].sort();
+      unique(data, 'Магазин по маджестику').forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v;
+        opt.textContent = v;
+        shopMajesticSelect.appendChild(opt);
+      });
+      unique(data, 'Магазин по серверу').forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v;
+        opt.textContent = v;
+        shopServerSelect.appendChild(opt);
+      });
+    }
+
+    function applyFilters(allRows) {
+      const query = (searchInput.value || '').toLowerCase();
+      const shopM = shopMajesticSelect.value;
+      const shopS = shopServerSelect.value;
+      return allRows.filter(item => {
+        const text = `${item['ID авто']} ${item['Марка авто']} ${item['Игровое название']}`.toLowerCase();
+        if (query && !text.includes(query)) return false;
+        if (shopM && item['Магазин по маджестику'] !== shopM) return false;
+        if (shopS && item['Магазин по серверу'] !== shopS) return false;
+        return true;
+      });
+    }
+
+    async function initTable() {
+      try {
+        const res = await fetch(csvUrl);
+        const txt = await res.text();
+        const rows = parseCSV(txt);
+        const headers = rows[0];
+        const data = rows.slice(1).map(r => {
+          const obj = {};
+          headers.forEach((h, idx) => obj[h] = r[idx] || '');
+          return obj;
+        });
+        populateFilters(data);
+        const update = () => renderCards(applyFilters(data));
+        searchInput.addEventListener('input', update);
+        shopMajesticSelect.addEventListener('change', update);
+        shopServerSelect.addEventListener('change', update);
+        update();
+      } catch (e) {
+        countEl.textContent = 'Ошибка загрузки списка';
+        console.error(e);
+      }
+    }
+
+    initTable();
+  </script>
+</body>
+</html>
+</body>
+</html>
+
