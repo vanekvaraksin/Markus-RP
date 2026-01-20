@@ -66,16 +66,20 @@
 
         <article class="detail-content">
           <section class="detail-section">
-            <h2>Что будет здесь</h2>
-            <p class="muted">Интерактивная карта с поиском по локациям, фильтрами по типам объектов, маршрутами и точками для квестов и работ.</p>
-          </section>
-          <section class="detail-section detail-highlight">
-            <h2>Статус</h2>
-            <p>Раздел в подготовке. Добавим слои: точки квестов, работы, досуг, бизнесы.</p>
-            <div class="meta-row">
-              <span class="meta-pill">Фаза: дизайн</span>
-              <span class="meta-pill">Обновление: скоро</span>
+            <h2>Интерактивная карта</h2>
+            <p class="muted">Встроенная карта через iframe. Замените ссылку на вашу: держите её в <code>data-map-url</code> ниже.</p>
+            <div class="embed-panel map-embed">
+              <iframe
+                id="mapFrame"
+                class="embed-frame"
+                src="about:blank"
+                data-map-url="https://wiki.majestic-rp.ru/ru/map"
+                loading="lazy"
+                allowfullscreen
+                referrerpolicy="no-referrer"
+              ></iframe>
             </div>
+            <div class="muted small">Если нужно поменять источник — измените <code>data-map-url</code> у iframe.</div>
           </section>
         </article>
       </div>
@@ -98,6 +102,13 @@
       <p class="muted small">Вся информация носит ознакомительный характер и не является офертой.</p>
     </footer>
   </div>
+  <script>
+    const frame = document.getElementById('mapFrame');
+    if (frame) {
+      const url = frame.dataset.mapUrl || '';
+      if (url) frame.src = url;
+    }
+  </script>
 </body>
 </html>
 

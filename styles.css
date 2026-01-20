@@ -676,6 +676,11 @@ h2 {
   border: none;
 }
 
+.map-embed {
+  min-height: 700px;
+  background: var(--panel-strong);
+}
+
 .table-wrap {
   background: var(--panel);
   border: 1px solid var(--border);
