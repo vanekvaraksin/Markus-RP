@@ -7,6 +7,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-o9N1j7kPjJbHYbgyfG3VYzWx53A0xtwH730G7v0sDyE="
+    crossorigin=""
+  />
   <link rel="stylesheet" href="../styles.css" />
 </head>
 <body>
@@ -39,7 +45,7 @@
         </div>
         <p class="eyebrow">Навигация</p>
         <h1>Карта</h1>
-        <p class="muted">Карта Markus RP со всеми локациями. Здесь позже появится интерактив с точками интереса.</p>
+        <p class="muted">Локальная интерактивная карта Markus RP без стороннего бренда. Используем ваше изображение.</p>
         <div class="chips">
           <span class="pill pill-pink">Локации</span>
           <span class="pill pill-dark">Маршруты</span>
@@ -67,19 +73,11 @@
         <article class="detail-content">
           <section class="detail-section">
             <h2>Интерактивная карта</h2>
-            <p class="muted">Встроенная карта через iframe. Замените ссылку на вашу: держите её в <code>data-map-url</code> ниже.</p>
-            <div class="embed-panel map-embed">
-              <iframe
-                id="mapFrame"
-                class="embed-frame"
-                src="about:blank"
-                data-map-url="https://wiki.majestic-rp.ru/ru/map"
-                loading="lazy"
-                allowfullscreen
-                referrerpolicy="no-referrer"
-              ></iframe>
+            <p class="muted">Карта рендерится локально из изображения <code>assets/map/los-santos.png</code>. Без внешнего бренда. Масштабируйте и двигайте карту колёсиком/перетаскиванием.</p>
+            <div class="map-panel">
+              <div id="mapCanvas" class="leaflet-map"></div>
             </div>
-            <div class="muted small">Если нужно поменять источник — измените <code>data-map-url</code> у iframe.</div>
+            <p class="muted small">Чтобы обновить фон: замените файл <code>assets/map/los-santos.png</code> своим изображением.</p>
           </section>
         </article>
       </div>
@@ -102,12 +100,33 @@
       <p class="muted small">Вся информация носит ознакомительный характер и не является офертой.</p>
     </footer>
   </div>
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-o9N1j7kPjJbHYbgyfG3VYzWx53A0xtwH730G7v0sDyE="
+    crossorigin=""
+  ></script>
   <script>
-    const frame = document.getElementById('mapFrame');
-    if (frame) {
-      const url = frame.dataset.mapUrl || '';
-      if (url) frame.src = url;
-    }
+    (function () {
+      const imgUrl = '../assets/map/los-santos.png';
+      // Размер исходного изображения (px). Если замените картинку, обновите числа ниже.
+      const imgWidth = 768;
+      const imgHeight = 1113;
+
+      const mapEl = document.getElementById('mapCanvas');
+      if (!mapEl) return;
+
+      const bounds = [[0, 0], [imgHeight, imgWidth]];
+      const map = L.map(mapEl, {
+        crs: L.CRS.Simple,
+        minZoom: -2,
+        maxZoom: 4,
+        zoomSnap: 0.25,
+        wheelPxPerZoomLevel: 120,
+      });
+
+      L.imageOverlay(imgUrl, bounds).addTo(map);
+      map.fitBounds(bounds);
+    })();
   </script>
 </body>
 </html>

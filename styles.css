@@ -681,6 +681,23 @@ h2 {
   background: var(--panel-strong);
 }
 
+.map-panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.leaflet-map {
+  width: 100%;
+  height: 900px;
+}
+
+.leaflet-container {
+  background: #0f0f16;
+}
+
 .table-wrap {
   background: var(--panel);
   border: 1px solid var(--border);
