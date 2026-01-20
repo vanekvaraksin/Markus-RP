@@ -676,28 +676,6 @@ h2 {
   border: none;
 }
 
-.map-embed {
-  min-height: 700px;
-  background: var(--panel-strong);
-}
-
-.map-panel {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  box-shadow: var(--shadow);
-}
-
-.leaflet-map {
-  width: 100%;
-  height: 900px;
-}
-
-.leaflet-container {
-  background: #0f0f16;
-}
-
 .table-wrap {
   background: var(--panel);
   border: 1px solid var(--border);
@@ -855,6 +833,31 @@ h2 {
   border-bottom: 1px solid var(--border);
   padding: 8px;
   text-align: left;
+}
+
+/* Map */
+.map-wrapper {
+  margin-top: 18px;
+}
+
+.map-container {
+  height: 78vh;
+  min-height: 520px;
+  background: var(--panel-strong);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  position: relative;
+}
+
+.map-status {
+  margin-top: 10px;
+  color: var(--muted);
+}
+
+.map-error {
+  color: #ff7ac8;
+  font-weight: 700;
 }
 
 /* Skins gallery */

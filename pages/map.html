@@ -7,13 +7,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles.css" />
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-o9N1j7kPjJbHYbgyfG3VYzWx53A0xtwH730G7v0sDyE="
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
     crossorigin=""
   />
-  <link rel="stylesheet" href="../styles.css" />
 </head>
 <body>
   <div class="page">
@@ -45,7 +45,7 @@
         </div>
         <p class="eyebrow">Навигация</p>
         <h1>Карта</h1>
-        <p class="muted">Локальная интерактивная карта Markus RP без стороннего бренда. Используем ваше изображение.</p>
+        <p class="muted">Карта рендерится из файла <code>assets/map/los-santos.png</code> (можно также <code>los-santos-map.png</code>). Без внешнего хоста.</p>
         <div class="chips">
           <span class="pill pill-pink">Локации</span>
           <span class="pill pill-dark">Маршруты</span>
@@ -73,11 +73,11 @@
         <article class="detail-content">
           <section class="detail-section">
             <h2>Интерактивная карта</h2>
-            <p class="muted">Карта рендерится локально из изображения <code>assets/map/los-santos.png</code>. Без внешнего бренда. Масштабируйте и двигайте карту колёсиком/перетаскиванием.</p>
-            <div class="map-panel">
-              <div id="mapCanvas" class="leaflet-map"></div>
+            <p class="muted">Карта натянута на слой Leaflet (без маркеров). Положите изображение в <code>assets/map/los-santos.png</code> (или <code>assets/map/los-santos-map.png</code>). При отсутствии файла появится сообщение об ошибке.</p>
+            <div class="map-wrapper">
+              <div id="leafletMap" class="map-container"></div>
+              <div class="map-status" id="mapStatus">Загрузка карты...</div>
             </div>
-            <p class="muted small">Чтобы обновить фон: замените файл <code>assets/map/los-santos.png</code> своим изображением.</p>
           </section>
         </article>
       </div>
@@ -102,30 +102,66 @@
   </div>
   <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-o9N1j7kPjJbHYbgyfG3VYzWx53A0xtwH730G7v0sDyE="
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
     crossorigin=""
   ></script>
   <script>
-    (function () {
-      const imgUrl = '../assets/map/los-santos.png';
-      // Размер исходного изображения (px). Если замените картинку, обновите числа ниже.
-      const imgWidth = 768;
-      const imgHeight = 1113;
+    const mapCandidates = [
+      '../assets/map/los-santos.png',
+      '../assets/map/los-santos-map.png',
+    ];
+    const statusEl = document.getElementById('mapStatus');
+    const mapContainer = document.getElementById('leafletMap');
 
-      const mapEl = document.getElementById('mapCanvas');
-      if (!mapEl) return;
+    function setStatus(text, isError = false) {
+      statusEl.textContent = text;
+      statusEl.classList.toggle('map-error', isError);
+    }
 
+    function initImageOverlay(map, imgWidth, imgHeight, imgPath) {
       const bounds = [[0, 0], [imgHeight, imgWidth]];
-      const map = L.map(mapEl, {
+      const imageLayer = L.imageOverlay(imgPath, bounds);
+      imageLayer.addTo(map);
+      map.fitBounds(bounds);
+      setStatus('Карта загружена');
+    }
+
+    function initMap(imgWidth, imgHeight, imgPath) {
+      const map = L.map('leafletMap', {
         crs: L.CRS.Simple,
+        zoomSnap: 0.25,
+        zoomDelta: 0.5,
         minZoom: -2,
         maxZoom: 4,
-        zoomSnap: 0.25,
-        wheelPxPerZoomLevel: 120,
       });
+      initImageOverlay(map, imgWidth, imgHeight, imgPath);
+    }
 
-      L.imageOverlay(imgUrl, bounds).addTo(map);
-      map.fitBounds(bounds);
+    function loadImageDimensions(imgPath) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve({ w: img.naturalWidth, h: img.naturalHeight, path: imgPath });
+        img.onerror = reject;
+        img.src = imgPath + '?v=' + Date.now();
+      });
+    }
+
+    (async () => {
+      try {
+        let loaded = null;
+        for (const p of mapCandidates) {
+          try {
+            loaded = await loadImageDimensions(p);
+            break;
+          } catch (_) {}
+        }
+        if (!loaded || !loaded.w || !loaded.h) throw new Error('Нет размеров изображения');
+        initMap(loaded.w, loaded.h, loaded.path);
+      } catch (e) {
+        console.error(e);
+        setStatus('Не удалось загрузить карту. Проверьте файл: assets/map/los-santos.png (или los-santos-map.png)', true);
+        mapContainer.style.background = 'linear-gradient(135deg, rgba(255,79,161,0.12), rgba(15,15,22,0.9))';
+      }
     })();
   </script>
 </body>
